@@ -18,37 +18,42 @@
  */
 package rest.docs
 
-import com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper
-import geb.spock.GebSpec
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import groovy.json.JsonSlurper
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.specification.RequestSpecification
-import org.junit.Rule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.restdocs.JUnitRestDocumentation
+import org.springframework.restdocs.ManualRestDocumentation
 import rest.docs.snippets.LoginSnippets
+import spock.lang.Specification
 
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*
-import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.*
 
 @Integration
 @Rollback
-class LoginSpec extends GebSpec {
+class LoginSpec extends Specification {
 
     static final String Login_URL = '/api/login'
 
     @Value('${local.server.port}')
     protected int port
 
-    @Rule
-    JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('build/docs/generated-snippets')
+    private ManualRestDocumentation restDocumentation = new ManualRestDocumentation();
+    private RequestSpecification spec
 
-    RequestSpecification documentationSpec
+    def setup() {
+        this.spec = new RequestSpecBuilder().addFilter(documentationConfiguration(this.restDocumentation)).build()
+        this.restDocumentation.beforeTest(getClass(), specificationContext.currentIteration.displayName)
+    }
+
+    def cleanup() {
+        this.restDocumentation.afterTest()
+    }
 
     void "Test Login"() {
         given: "A rest request for the events"
@@ -61,7 +66,7 @@ class LoginSpec extends GebSpec {
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .filter(
                             //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-login',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),
@@ -93,37 +98,37 @@ class LoginSpec extends GebSpec {
     }
 
     void "Test Login wrong password"() {
-            given: "A rest request for the events"
-                RequestSpecification documentSpec = new RequestSpecBuilder()
-                        .addFilter(documentationConfiguration(this.restDocumentation))
-                        .build()
-                RequestSpecification requestSpecification = RestAssured
-                        .given(documentSpec)
-                        .accept(MediaType.APPLICATION_JSON_VALUE)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .filter(
-                                //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
-                                RestAssuredRestDocumentationWrapper.document(
-                                        'api-login-invalid',
-                                        preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), prettyPrint()),
-                                        preprocessResponse(prettyPrint()),
+        given: "A rest request for the events"
+            RequestSpecification documentSpec = new RequestSpecBuilder()
+                    .addFilter(documentationConfiguration(this.restDocumentation))
+                    .build()
+            RequestSpecification requestSpecification = RestAssured
+                    .given(documentSpec)
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .filter(
+                            //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
+                            document(
+                                    'api-login-invalid',
+                                    preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), prettyPrint()),
+                                    preprocessResponse(prettyPrint()),
 
-                                        LoginSnippets.LoginRequestSnippet
-                                )
-                        )
-            when: "POST to login and get access token"
-                def response = requestSpecification
-                        .when()
-                        .accept(MediaType.APPLICATION_JSON_VALUE)
-                        .contentType(MediaType.APPLICATION_JSON_VALUE)
-                        .body('{ "username":"me", "password":"12345" }')
-                        .port(port)
-                        .post(Login_URL)
+                                    LoginSnippets.LoginRequestSnippet
+                            )
+                    )
+        when: "POST to login and get access token"
+            def response = requestSpecification
+                    .when()
+                    .accept(MediaType.APPLICATION_JSON_VALUE)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .body('{ "username":"me", "password":"12345" }')
+                    .port(port)
+                    .post(Login_URL)
 
-            then: "status is OK"
-                response.then()
-                        .assertThat()
-                        .statusCode(HttpStatus.UNAUTHORIZED.value())
-        }
+        then: "status is OK"
+            response.then()
+                    .assertThat()
+                    .statusCode(HttpStatus.UNAUTHORIZED.value())
+    }
 
 }

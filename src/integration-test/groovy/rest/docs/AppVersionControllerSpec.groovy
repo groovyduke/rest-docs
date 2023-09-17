@@ -18,7 +18,7 @@
  */
 package rest.docs
 
-import com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper
+
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import groovy.json.JsonSlurper
@@ -29,6 +29,7 @@ import org.springframework.restdocs.payload.JsonFieldType
 import static org.springframework.restdocs.headers.HeaderDocumentation.*
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import static org.springframework.restdocs.payload.PayloadDocumentation.*
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.*
 
 @Integration
 @Rollback
@@ -39,10 +40,10 @@ class AppVersionControllerSpec extends APIControllerSpec {
     void "Test and document AppVersion request (GET request, index action) to end-point: /api/appVersion"() {
         given: "A rest request for the Users"
 
-            RequestSpecification requestSpecification = setupAynotomosRequestSpecification()
+            RequestSpecification requestSpecification = setupAnonymousRequestSpecification()
                     .filter(
                             //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-app-version-list',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),

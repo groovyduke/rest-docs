@@ -45,14 +45,20 @@ class UserController implements ControllerTrait {
         respond userService.list(command), model: [userCount: userService.count()]
     }
 
-    @Secured(['ROLE_USER'])
+    @Secured(['permitAll'])
     def show(Long id) {
-        respond userService.get(id)
+        User user = userService.get(id)
+
+        if (!user) {
+            return render(view:"/requestNotFound")
+        }
+
+        respond user
     }
 
     def save(SaveCommand command) {
         if (command == null) {
-            return render(status: NOT_FOUND)
+            return render(view:"/requestNotFound")
         }
 
         if (!validateCommandObject(command)) {
@@ -68,7 +74,7 @@ class UserController implements ControllerTrait {
 
     def update(Long id, UpdateCommand command) {
         if (command == null) {
-            render status: NOT_FOUND
+            return render(view:"/requestNotFound")
             return
         }
 
@@ -85,7 +91,7 @@ class UserController implements ControllerTrait {
 
     def delete(Long id) {
         if (id == null || userService.delete(id) == null) {
-            render status: NOT_FOUND
+            return render(view:"/requestNotFound")
             return
         }
 

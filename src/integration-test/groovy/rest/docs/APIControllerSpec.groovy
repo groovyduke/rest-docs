@@ -18,19 +18,18 @@
  */
 package rest.docs
 
-import geb.spock.GebSpec
 import groovy.json.JsonSlurper
 import io.restassured.RestAssured
 import io.restassured.builder.RequestSpecBuilder
 import io.restassured.specification.RequestSpecification
-import org.junit.Rule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
-import org.springframework.restdocs.JUnitRestDocumentation
+import org.springframework.restdocs.ManualRestDocumentation
+import spock.lang.Specification
 
-import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.documentationConfiguration
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.*
 
-class APIControllerSpec extends GebSpec {
+class APIControllerSpec extends Specification {
 
     static final String Login_URL = '/api/login'
 
@@ -39,21 +38,22 @@ class APIControllerSpec extends GebSpec {
     @Value('${local.server.port}')
     protected int port
 
-    @Rule
-    JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation('build/docs/generated-snippets')
-
+    ManualRestDocumentation restDocumentation = new ManualRestDocumentation()
     RequestSpecification documentationSpec
 
     def setup() {
         //set documentation specification
-        this.documentationSpec = new RequestSpecBuilder()
-                .addFilter(documentationConfiguration(this.restDocumentation))
-                .build()
+        this.documentationSpec = new RequestSpecBuilder().addFilter(documentationConfiguration(this.restDocumentation)).build()
+        this.restDocumentation.beforeTest(getClass(), specificationContext.currentIteration.displayName)
 
         //This sets up the security token to be used by the tests
         if (!Rest_Token) {
             Rest_Token = login()
         }
+    }
+
+    def cleanup() {
+        this.restDocumentation.afterTest()
     }
 
     String login(String username = 'me', String password = 'password') {
@@ -90,7 +90,7 @@ class APIControllerSpec extends GebSpec {
                 .port(this.port)
     }
 
-    RequestSpecification setupAynotomosRequestSpecification() {
+    RequestSpecification setupAnonymousRequestSpecification() {
         RestAssured
                 .given(this.documentationSpec)
                 .accept(MediaType.APPLICATION_JSON_VALUE)

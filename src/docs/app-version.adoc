@@ -4,9 +4,9 @@
 :toc: left
 :toclevels: 4
 :sectlinks:
-:stylesheet: style.css
+:stylesheet: src/docs/style.css
 
-include::index-link.adoc[]
+include::src/docs/index-link.adoc[]
 
 [[resources-app-version]]
 == App-Version
@@ -34,4 +34,4 @@ include::{snippets}/api-app-version-list/http-response.adoc[]
 
 
 
-include::nav-links.adoc[]
+include::src/docs/nav-links.adoc[]

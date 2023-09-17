@@ -4,7 +4,7 @@
 :toc: left
 :toclevels: 4
 :sectlinks:
-:stylesheet: style.css
+:stylesheet: src/docs/style.css
 
 [[overview]]
 = Overview
@@ -153,4 +153,4 @@ include::{snippets}/error-validation/response-fields.adoc[]
 ==== Example response
 include::{snippets}/error-validation/http-response.adoc[]
 
-include::nav-links.adoc[]
+include::src/docs/nav-links.adoc[]

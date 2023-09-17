@@ -1,8 +1,21 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 buildscript {
     repositories {
+        mavenLocal()
         maven { url 'https://repo.spring.io/libs-snapshot' }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath "com.bmuschko:gradle-docker-plugin:7.1.0"
+        classpath "org.asciidoctor:asciidoctor-gradle-jvm:3.3.2"
+
     }
 }
+
+apply plugin: org.asciidoctor.gradle.jvm.AsciidoctorJPlugin
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 repositories {
     maven { url 'https://repo.spring.io/libs-snapshot' }
@@ -10,16 +23,27 @@ repositories {
 
 //add extra user-defined properties to the project through ext block
 ext {
-    snippetsDir = file('build/docs/generated-snippets') //output dir of rest api doc snippets generated
+    snippetsDir = file('build/generated-snippets') //output dir of rest api doc snippets generated
     restDocsVersion = '2.0.3.RELEASE'
-    restAssuredVersion = '3.0.6'
+    restAssuredVersion = '4.5.1'
 }
 
 dependencies {
-    testCompile "org.springframework.restdocs:spring-restdocs-core:$restDocsVersion"
-    testCompile "org.springframework.restdocs:spring-restdocs-restassured:$restDocsVersion"
-    testCompile "org.springframework.restdocs:spring-restdocs-asciidoctor:$restDocsVersion"
-    testCompile "io.rest-assured:rest-assured:$restAssuredVersion"
+    testImplementation "org.springframework.restdocs:spring-restdocs-core:$restDocsVersion"
+    testImplementation "org.springframework.restdocs:spring-restdocs-restassured:$restDocsVersion"
+    testImplementation "org.springframework.restdocs:spring-restdocs-asciidoctor:$restDocsVersion"
+    testImplementation "io.rest-assured:rest-assured:$restAssuredVersion"
+    testImplementation('org.springframework.boot:spring-boot-devtools')
+
+    testImplementation 'org.grails.plugins:geb:2.0.0'
+    testImplementation 'io.micronaut:micronaut-inject-groovy'
+    testImplementation 'org.grails:grails-gorm-testing-support'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.grails:grails-web-testing-support'
+    testImplementation 'org.grails:views-json-testing-support'
+    testImplementation 'org.hibernate.validator:hibernate-validator:6.0.20.Final'
+    testImplementation "org.testcontainers:postgresql:1.18.3"
+    testImplementation "org.testcontainers:spock:1.18.3"
 }
 
 //task to clean generated rest api docs snippets dir
@@ -29,9 +53,32 @@ task cleanSnippetsDir(type: Delete) {
 
 //configure test task
 test {
+    useJUnitPlatform()
     dependsOn cleanSnippetsDir //clean rest api docs generated before running tests
     outputs.dir snippetsDir //add snippets dir as an output dir
+
+    if (project.hasProperty('maxParallelForks')) {
+        maxParallelForks = project.maxParallelForks as int
+    }
+
+    if (project.hasProperty('forkEvery')) {
+        forkEvery = project.forkEvery as int
+    }
+
 }
+
+
+integrationTest {
+    useJUnitPlatform()
+    maxHeapSize = "8g"
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStackTraces = true
+        showStandardStreams = true
+        exceptionFormat = TestExceptionFormat.FULL
+    }
+}
+
 
 //configure asciidoctor task provided by Gradle asciidoctor plugin- https://github.com/asciidoctor/asciidoctor-gradle-plugin
 asciidoctor {
@@ -44,7 +91,6 @@ asciidoctor {
     logDocuments = true
     sourceDir = file('src/docs')
     inputs.dir snippetsDir
-    separateOutputDirs = false
 
     attributes 'snippets': snippetsDir //configure snippets attribute for .adoc files
 

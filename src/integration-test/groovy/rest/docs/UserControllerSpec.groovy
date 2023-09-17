@@ -18,7 +18,7 @@
  *  under the License.
  */package rest.docs
 
-import com.epages.restdocs.apispec.RestAssuredRestDocumentationWrapper
+
 import grails.gorm.transactions.Rollback
 import grails.testing.mixin.integration.Integration
 import groovy.json.JsonSlurper
@@ -29,6 +29,7 @@ import rest.docs.snippets.GlobalSnippets
 import rest.docs.snippets.UserDocSnippets
 
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*
+import static org.springframework.restdocs.restassured3.RestAssuredRestDocumentation.*
 
 @Integration
 @Rollback
@@ -47,7 +48,7 @@ class UserControllerSpec extends APIControllerSpec {
             RequestSpecification requestSpecification = setupRequestSpecification()
                     .filter(
                             //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-user-list',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), new AuthHeaderPreprocessor(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),
@@ -84,7 +85,7 @@ class UserControllerSpec extends APIControllerSpec {
             RequestSpecification requestSpecification = setupRequestSpecification()
                     .filter(
                             //This is what does the documentation if you miss something the test will fail. The preprocessors cleanup the output for the docs.
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-user-fetch',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), new AuthHeaderPreprocessor(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),
@@ -133,7 +134,7 @@ class UserControllerSpec extends APIControllerSpec {
                     "passwordExpired":false
                 }''')
                     .filter(
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-user-create',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), new AuthHeaderPreprocessor(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),
@@ -179,7 +180,7 @@ class UserControllerSpec extends APIControllerSpec {
                     "passwordExpired":false
                 }""")
                     .filter(
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-user-update',
                                     preprocessRequest(Preprocessors.modifyUris().host('api.restdocs.com').removePort(), new AuthHeaderPreprocessor(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),
@@ -220,7 +221,7 @@ class UserControllerSpec extends APIControllerSpec {
 
             requestSpecification = setupRequestSpecification()
                     .filter(
-                            RestAssuredRestDocumentationWrapper.document(
+                            document(
                                     'api-user-delete',
                                     preprocessRequest(modifyUris().host('api.restdocs.com').removePort(), new AuthHeaderPreprocessor(), prettyPrint()),
                                     preprocessResponse(prettyPrint()),

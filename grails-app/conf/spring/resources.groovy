@@ -16,6 +16,8 @@
  *  specific language governing permissions and limitations
  *  under the License.
  */
+
+
 import rest.docs.RestAccessDeniedHandler
 import rest.docs.RestAwareAuthenticationEntryPoint
 import rest.docs.UserPasswordEncoderListener
@@ -26,12 +28,12 @@ beans = {
 
     securityContextRepository(org.springframework.security.web.context.NullSecurityContextRepository)
 
-    authenticationEntryPoint(RestAwareAuthenticationEntryPoint) {
+    restAuthenticationEntryPoint(RestAwareAuthenticationEntryPoint) {
         messageSource = ref('messageSource')
         jsonTemplateService = ref('jsonTemplateService')
     }
 
-    accessDeniedHandler(RestAccessDeniedHandler) {
+    restAccessDeniedHandler(RestAccessDeniedHandler) {
         jsonTemplateService = ref('jsonTemplateService')
     }
 }

@@ -1,4 +1,7 @@
+import org.springframework.http.MediaType
+
 response.status 401
+response.contentType(MediaType.APPLICATION_JSON_VALUE)
 
 json {
 	message "Unauthorized"
